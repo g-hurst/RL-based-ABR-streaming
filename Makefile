@@ -4,7 +4,8 @@ PY=python3
 ENV_PATH=.env
 PY_ENV=source ./$(ENV_PATH)/bin/activate
 
-REQUIREMENTS= $(PY)-venv 
+# requirements for stablebaselines as well
+REQUIREMENTS= $(PY)-venv cmake libopenmpi-dev python3-dev zlib1g-dev
 
 # commands that must be run as sudo
 .phony: setup

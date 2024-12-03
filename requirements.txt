@@ -1,2 +1,5 @@
 jupyterlab
 ipykernel
+
+gymnasium
+stable-baselines
