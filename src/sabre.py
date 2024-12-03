@@ -1230,6 +1230,28 @@ class ReplacementInput(Replacement):
         return self.replacement.check_abandon(progress, buffer_level)
 
 def main(args):
+    global manifest
+    global verbose
+    global buffer_contents
+    global buffer_fcc
+    global throughput
+    global latency
+    global rebuffer_event_count
+    global rebuffer_time
+    global played_utility
+    global played_bitrate
+    global total_play_time
+    global total_bitrate_change
+    global total_log_bitrate_change
+    global last_played
+    global max_buffer_size
+    global pending_quality_up
+    global total_reaction_time
+    global rampup_origin
+    global rampup_time
+    global rampup_threshold
+    global sustainable_quality
+
     verbose = args.verbose
 
     buffer_contents = []
