@@ -1,11 +1,12 @@
 import gymnasium as gym
 import numpy as np
 from stable_baselines3.common.vec_env import DummyVecEnv
-
+from emulator import Emulator
 
 class ABR_Env(gym.Env):
-    def __init__(self, emulator, r_multipliers=[1, 1, 1]):
+    def __init__(self, emulator:Emulator, r_multipliers=[1, 1, 1]):
         self.emulator = emulator
+        self.r_multipliers = r_multipliers
         self.look_ahead = 5
         self.look_back  = 5
         self.n_bitrates = len(emulator.bitrates)
@@ -23,58 +24,60 @@ class ABR_Env(gym.Env):
         
         self.action_space = gym.spaces.Discrete(self.n_bitrates)
         self.action_prev = None
+
     def step(self, action):
-        observation = {
-            'qualities':       None,
-            'buffer_level':    None, 
-            'throughput':      None,
-            'throughput_avg':  None,
-            'throughput_std':  None
-        }
-        reward = 0 
-        is_terminal = True
         truncated = False
         info = {}
 
         # take the action in the emulator and update accordingly
-        throughput, latency, rebuff_time = emulator.step(action)
+        throughput, latency, rebuff_time = self.emulator.step(action)
         self.throughput_prev.append(throughput)
         if len(self.throughput_prev) > self.look_back:
             self.throughput_prev.pop(0)
         
-        # make the observation of the next state
-        seg = self.emulator.current_segment
-        segs_left   =  self.emulator.get_n_segs_left()
-        is_terminal = (segs_left == 0)
-        if segs_left < self.look_back:
-            observation['qualities'] = self.emulator.get_segs(seg, seg+self.look_back)
-        else:
-            observation['qualities'] = np.array(self.emulator.get_segs(seg, segs_left))
-            observation['qualities'].vstack(np.zeros((self.look_ahead - segs_left, self.n_bitrates)))
-        observation['buffer_level'] = self.emulator.get_buffer_level()
-        observation['throughput_avg'] = np.avg(self.throughput_prev)
-        observation['througput_std'] = np.std(self.througput_prev)
-        assert all(o is not None for o in observation.values())
-
+        observation = self.get_observation(throughput)
         # check if the quality changed from the last bitrate selection action
         is_q_change = False
         if self.action_prev is not None:
             is_q_change = (self.action_prev == action)
         
         # calculate the qoe at the current time step
-        reward = (action * r_multiplers[0]) - (is_q_change * r_multipler[1]) - (rebuff_time * r_multiplier[2])
+        reward = (action * self.r_multipliers[0]) - (is_q_change * self.r_multipliers[1]) - (rebuff_time * self.r_multipliers[2])
+
+        is_terminal = (self.emulator.get_n_segs_left() == 0)
 
         return observation, reward, is_terminal, truncated, info
+
     def reset(self, seed=None):
-        observation = {
-            'qualities':       None,
-            'buffer_level':    None, 
-            'throughput':      None,
-            'throughput_avg':  None,
-            'throughput_std':  None
-        }
+        self.emulator.reset()
+        observation = self.get_observation(0)
         info = {}
         return observation, info
+
+    def get_observation(self, throughput):
+        observation = {}
+        seg = self.emulator.current_segment
+        segs_left   =  self.emulator.get_n_segs_left()
+        observation['buffer_level'] = self.emulator.get_buffer_level()
+        observation['throughput'] = throughput
+        if segs_left >= self.look_ahead:
+            observation['qualities'] = self.emulator.get_segs(seg, seg+self.look_ahead)
+        elif segs_left > 0:
+            observation['qualities'] = np.array(self.emulator.get_segs(seg, seg+segs_left), dtype=np.float32)
+            zeros = np.zeros((self.look_ahead - segs_left, self.n_bitrates), dtype=np.float32)
+            observation['qualities'] = np.vstack((observation['qualities'],zeros))
+        else:
+            observation['qualities'] = np.zeros((self.look_ahead, self.n_bitrates), dtype=np.float32)
+
+        if len(self.throughput_prev) > 0:
+            observation['throughput_avg'] = np.mean(self.throughput_prev)
+            observation['throughput_std'] = np.std(self.throughput_prev)
+        else:
+            observation['throughput_avg'] = 0
+            observation['throughput_std'] = 0
+        assert all(o is not None for o in observation.values())
+        return observation
+
     def get_sb_env(self):
         e = DummyVecEnv([lambda: self])
         obs = e.reset()
