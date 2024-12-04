@@ -3,4 +3,4 @@ ipykernel
 
 numpy
 gymnasium
-stable-baselines
+stable-baselines3
