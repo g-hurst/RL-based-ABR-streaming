@@ -2,5 +2,6 @@ jupyterlab
 ipykernel
 
 numpy
+pandas
 gymnasium
 stable-baselines3
