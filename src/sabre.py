@@ -1251,6 +1251,8 @@ def main(args):
     global rampup_time
     global rampup_threshold
     global sustainable_quality
+    global t
+    global l
 
     verbose = args.verbose
 
@@ -1278,6 +1280,8 @@ def main(args):
     rampup_origin = 0
     rampup_time = None
     rampup_threshold = args.rampup_threshold
+    t = 0
+    l = 0
 
     max_buffer_size = args.max_buffer * 1000
 

@@ -2,9 +2,11 @@ import gymnasium as gym
 import numpy as np
 from stable_baselines3.common.vec_env import DummyVecEnv
 from emulator import Emulator
+import sabre
 
 class ABR_Env(gym.Env):
     def __init__(self, network_traces, movies, r_multipliers=[1, 1, 1], is_testing=False):
+        self.is_testing     = is_testing
         self.r_multipliers  = r_multipliers
         self.network_traces = network_traces
         self.trace_idx      = 0
@@ -34,8 +36,17 @@ class ABR_Env(gym.Env):
         truncated = False
         info = {}
 
-        # take the action in the emulator and update accordingly
-        throughput, latency, rebuff_time = self.emulator.step(action)
+        if self.is_testing:
+            # get latency, throutput, and rebuff_time from sabre globals
+            throughput = sabre.t
+            latency    = sabre.l
+            rebuff_time = sabre.rebuff_time - self.emulator.last_rebuff_time
+            self.emulator.last_rebuff_time = sabre.rebuff_time
+        else:
+            # take the action in the emulator and update accordingly
+            throughput, latency, rebuff_time = self.emulator.step(action)
+
+
         self.throughput_prev.append(throughput)
         if len(self.throughput_prev) > self.look_back:
             self.throughput_prev.pop(0)
