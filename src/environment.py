@@ -4,12 +4,17 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 from emulator import Emulator
 
 class ABR_Env(gym.Env):
-    def __init__(self, emulator:Emulator, r_multipliers=[1, 1, 1]):
-        self.emulator = emulator
-        self.r_multipliers = r_multipliers
+    def __init__(self, network_traces, movies, r_multipliers=[1, 1, 1]):
+        self.r_multipliers  = r_multipliers
+        self.network_traces = network_traces
+        self.trace_idx      = 0
+        self.movies         = movies
+        self.movie_idx      = 1
+        self.emulator   = Emulator(movies[0], network_traces[0])
         self.look_ahead = 5
         self.look_back  = 5
-        self.n_bitrates = len(emulator.bitrates)
+        self.n_bitrates = len(self.emulator.bitrates)
+
         self.observation_space = gym.spaces.Dict({
             'qualities':       gym.spaces.Box(low=0, 
                                               high=np.inf, 
@@ -49,9 +54,15 @@ class ABR_Env(gym.Env):
         return observation, reward, is_terminal, truncated, info
 
     def reset(self, seed=None):
-        self.emulator.reset()
-        observation = self.get_observation(0)
         info = {}
+        if self.trace_idx == 0:
+            self.movie_idx = (self.movie_idx + 1) % len(self.movies)
+        else:
+            self.trace_idx = (self.trace_idx + 1) % len(self.network_traces)
+
+        self.emulator  = Emulator(self.movies[self.movie_idx], self.network_traces[self.trace_idx])
+        observation = self.get_observation(0)
+
         return observation, info
 
     def get_observation(self, throughput):
@@ -79,6 +90,4 @@ class ABR_Env(gym.Env):
         return observation
 
     def get_sb_env(self):
-        e = DummyVecEnv([lambda: self])
-        obs = e.reset()
-        return e, obs
+        return DummyVecEnv([lambda: self])

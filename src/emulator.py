@@ -3,7 +3,7 @@ import math
 
 class Emulator:
     def __init__(self, movie, network, max_buffer=25):
-        self.movie = movie
+        self.movie   = movie
         self.network = network
         self.max_buffer = max_buffer
         self.setup(movie, network, max_buffer)
