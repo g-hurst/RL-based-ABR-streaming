@@ -41,6 +41,7 @@ class ABR_Env(gym.Env):
             self.throughput_prev.pop(0)
         
         observation = self.get_observation(throughput)
+
         # check if the quality changed from the last bitrate selection action
         is_q_change = False
         if self.action_prev is not None:
@@ -49,6 +50,7 @@ class ABR_Env(gym.Env):
         # calculate the qoe at the current time step
         reward = (action * self.r_multipliers[0]) - (is_q_change * self.r_multipliers[1]) - (rebuff_time * self.r_multipliers[2])
 
+        # once the movie has ended, a terminal state is reached
         is_terminal = (self.emulator.get_n_segs_left() == 0)
 
         return observation, reward, is_terminal, truncated, info
@@ -56,10 +58,14 @@ class ABR_Env(gym.Env):
     def reset(self, seed=None):
         info = {}
         if self.trace_idx == 0:
+            # move on to the next movie now that the trace is over
             self.movie_idx = (self.movie_idx + 1) % len(self.movies)
         else:
+            # move on to the to the next trace with the same movie
             self.trace_idx = (self.trace_idx + 1) % len(self.network_traces)
 
+        # create a new instance of the emulator now that the trace/movie has been incramented
+        # this is important because it resets a LOT of sabre global variables
         self.emulator  = Emulator(self.movies[self.movie_idx], self.network_traces[self.trace_idx])
         observation = self.get_observation(0)
 
@@ -71,6 +77,9 @@ class ABR_Env(gym.Env):
         segs_left   =  self.emulator.get_n_segs_left()
         observation['buffer_level'] = self.emulator.get_buffer_level()
         observation['throughput'] = throughput
+
+        # the look_ahead segment sizes are set to zero when nearing the end of
+        # the movie and there are no more to look at. 
         if segs_left >= self.look_ahead:
             observation['qualities'] = self.emulator.get_segs(seg, seg+self.look_ahead)
         elif segs_left > 0:
@@ -80,13 +89,17 @@ class ABR_Env(gym.Env):
         else:
             observation['qualities'] = np.zeros((self.look_ahead, self.n_bitrates), dtype=np.float32)
 
+        # througput values are initally set to zero when no observations have been made yet
         if len(self.throughput_prev) > 0:
             observation['throughput_avg'] = np.mean(self.throughput_prev)
             observation['throughput_std'] = np.std(self.throughput_prev)
         else:
             observation['throughput_avg'] = 0
             observation['throughput_std'] = 0
+
+        # sanity check that all observation keys have values
         assert all(o is not None for o in observation.values())
+
         return observation
 
     def get_sb_env(self):
