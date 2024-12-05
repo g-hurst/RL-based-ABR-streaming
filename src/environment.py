@@ -4,7 +4,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 from emulator import Emulator
 
 class ABR_Env(gym.Env):
-    def __init__(self, network_traces, movies, r_multipliers=[1, 1, 1]):
+    def __init__(self, network_traces, movies, r_multipliers=[1, 1, 1], is_testing=False):
         self.r_multipliers  = r_multipliers
         self.network_traces = network_traces
         self.trace_idx      = 0
