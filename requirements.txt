@@ -3,5 +3,6 @@ ipykernel
 
 numpy
 pandas
+matplotlib
 gymnasium
 stable-baselines3
