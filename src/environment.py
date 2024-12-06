@@ -40,8 +40,8 @@ class ABR_Env(gym.Env):
             # get latency, throutput, and rebuff_time from sabre globals
             throughput = sabre.t
             latency    = sabre.l
-            rebuff_time = sabre.rebuff_time - self.emulator.last_rebuff_time
-            self.emulator.last_rebuff_time = sabre.rebuff_time
+            rebuff_time = sabre.rebuffer_time - self.emulator.last_rebuff_time
+            self.emulator.last_rebuff_time = sabre.rebuffer_time
         else:
             # take the action in the emulator and update accordingly
             throughput, latency, rebuff_time = self.emulator.step(action)
