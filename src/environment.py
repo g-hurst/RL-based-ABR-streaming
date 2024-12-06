@@ -29,12 +29,15 @@ class ABR_Env(gym.Env):
         })
         self.throughput_prev = []
         
-        self.action_space = gym.spaces.Discrete(self.n_bitrates)
+        self.action_space = gym.spaces.Box(low=0, high=self.n_bitrates-1, dtype=np.float32)
         self.action_prev = None
 
     def step(self, action):
         truncated = False
         info = {}
+
+        # action is a bitrate index, so round to the nearest whole number
+        action = int(round(action[0], 0))
 
         if self.is_testing:
             # get latency, throutput, and rebuff_time from sabre globals
