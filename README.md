@@ -2,9 +2,9 @@
 
 ### Getting Started
 
-For convienience purposes, a Makefile was written in order to simplify the process of 
+For convienience purposes, a `Makefile` was written in order to simplify the process of 
 setting up the repo. Note, this repo was developed and run on an Ubuntu 22 system 
-as well as a WSL Ubuntu 22 system. The code is undtested on windows and mac.  
+as well as a WSL Ubuntu 22 system. The code is untested on windows and mac.  
 
 Stable Baselines requires several packages. They can be installed with:
 ```
