@@ -1,6 +1,6 @@
 # RL-based-ABR-streaming
 
-### Getting Started
+### Getting Started:
 
 For convienience purposes, a `Makefile` was written in order to simplify the process of 
 setting up the repo. Note, this repo was developed and run on an Ubuntu 22 system 
