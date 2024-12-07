@@ -57,12 +57,12 @@ class ABR_Env(gym.Env):
         observation = self.get_observation(throughput)
 
         # check if the quality changed from the last bitrate selection action
-        is_q_change = False
+        q_change = 0
         if self.action_prev is not None:
-            is_q_change = (self.action_prev == action)
+            q_change = abs(self.action_prev - action)
         
         # calculate the qoe at the current time step
-        reward = (action * self.r_multipliers[0]) - (is_q_change * self.r_multipliers[1]) - (rebuff_time * self.r_multipliers[2])
+        reward = (action * self.r_multipliers[0]) - (q_change * self.r_multipliers[1]) - (rebuff_time * self.r_multipliers[2])
 
         # once the movie has ended, a terminal state is reached
         is_terminal = (self.emulator.get_n_segs_left() == 0)
