@@ -64,12 +64,36 @@ and `MODEL_PATH_A2C` options for the A2C model.
 **Results:**  
 The test results for all models was saved in the resutls folder in csv format. Here is what it looks like in pandas for reference:
 ```
-movie	network_trace	algorithm	buffer size	total played utility	time average played utility	total played bitrate	time average played bitrate	total play time	total play time chunks	...	time average log bitrate change	time average score	over estimate count	over estimate	leq estimate count	leq estimate	estimate	rampup time	total reaction time	qoe
-0	../data/bbb.json	../data/hd_fs/trace0019.json	ABR_A2C.py	25000.0	645.764217	2.724352	1188230.0	5012.908766	711.102110	237.034037	...	0.013759	1.926244	13.0	6523.409548	185.0	9403.792564	-8358.067173	11.259144	0.000000	500.677776
-1	../data/bbb.json	../data/hd_fs/trace0513.json	ABR_A2C.py	25000.0	645.764217	2.829825	1188230.0	5206.981555	684.598162	228.199387	...	0.014292	2.193755	38.0	2783.694733	160.0	8062.314977	-5980.757557	8.590966	3.590966	520.062416
-2	../data/bbb.json	../data/hd_fs/trace0989.json	ABR_A2C.py	25000.0	645.764217	2.735456	1188230.0	5033.339565	708.215679	236.071893	...	0.013815	1.954155	28.0	4495.573585	170.0	8693.134615	-6828.064769	10.397319	0.000000	502.718472
-3	../data/bbb.json	../data/hd_fs/trace0258.json	ABR_A2C.py	25000.0	645.764217	2.813766	1188230.0	5177.432718	688.505326	229.501775	...	0.014211	2.152231	38.0	1646.039792	160.0	3908.562825	-2842.527979	7.705582	0.000000	517.110975
-4	../data/bbb.json	../data/hd_fs/trace0166.json	ABR_A2C.py	25000.0	645.764217	2.701539	1188230.0	4970.931244	717.107082	239.035694	...	0.013644	1.869964	23.0	4463.837598	175.0	6152.685357	-4919.452893	14.075808	0.000000	496.484930
+<class 'pandas.core.frame.DataFrame'>
+Index: 1000 entries, 0 to 249
+Data columns (total 28 columns):
+ #   Column                           Non-Null Count  Dtype  
+---  ------                           --------------  -----  
+ 0   movie                            1000 non-null   object 
+ 1   network_trace                    1000 non-null   object 
+ 2   algorithm                        1000 non-null   object 
+ 3   buffer size                      1000 non-null   float64
+ 4   total played utility             1000 non-null   float64
+ 5   time average played utility      1000 non-null   float64
+ 6   total played bitrate             1000 non-null   float64
+ 7   time average played bitrate      1000 non-null   float64
+ 8   total play time                  1000 non-null   float64
+ 9   total play time chunks           1000 non-null   float64
+ 10  total rebuffer                   1000 non-null   float64
+ 11  rebuffer ratio                   1000 non-null   float64
+ 12  time average rebuffer            1000 non-null   float64
+ 13  total rebuffer events            1000 non-null   float64
+ 14  time average rebuffer events     1000 non-null   float64
+ 15  total bitrate change             1000 non-null   float64
+ 16  time average bitrate change      1000 non-null   float64
+ 17  total log bitrate change         1000 non-null   float64
+ 18  time average log bitrate change  1000 non-null   float64
+ 19  time average score               1000 non-null   float64
+...
+ 26  total reaction time              1000 non-null   float64
+ 27  qoe                              1000 non-null   float64
+dtypes: float64(25), object(3)
+memory usage: 226.6+ KB
 ```
 
 ### Running the project:
