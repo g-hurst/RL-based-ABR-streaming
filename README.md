@@ -95,9 +95,3 @@ Data columns (total 28 columns):
 dtypes: float64(25), object(3)
 memory usage: 226.6+ KB
 ```
-
-### Running the project:
-The main code for this project is in the `src/main.ipynb` jupyter notebook. 
-
-
-
