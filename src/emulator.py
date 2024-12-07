@@ -72,6 +72,7 @@ class Emulator:
         if self.current_segment > 0:
             sabre.deplete_buffer(download_metric.time)
         rebuff = sabre.rebuffer_time - self.last_rebuff_time
+        self.last_rebuff_time = sabre.rebuffer_time
         sabre.buffer_contents.append(download_metric.quality)
         self.current_segment += 1
 
