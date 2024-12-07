@@ -23,11 +23,11 @@ class ABR_Env(gym.Env):
                                               shape=(self.look_ahead, self.n_bitrates), 
                                               dtype=np.float32),
             'buffer_level':    gym.spaces.Box(low=0, high=np.inf, dtype=np.float32), 
-            'throughput':      gym.spaces.Box(low=0, high=np.inf, dtype=np.float32),
-            'throughput_avg':  gym.spaces.Box(low=0, high=np.inf, dtype=np.float32),
-            'throughput_std':  gym.spaces.Box(low=0, high=np.inf, dtype=np.float32)
+            'throughput':      gym.spaces.Box(low=0, high=np.inf, shape=(3,), dtype=np.float32),
+            'latency':         gym.spaces.Box(low=0, high=np.inf, shape=(3,), dtype=np.float32),
         })
         self.throughput_prev = []
+        self.latency_prev = []
         
         self.action_space = gym.spaces.Box(low=0, high=self.n_bitrates-1, dtype=np.float32)
         self.action_prev = None
@@ -48,25 +48,28 @@ class ABR_Env(gym.Env):
         else:
             # take the action in the emulator and update accordingly
             throughput, latency, rebuff_time = self.emulator.step(action)
-
-
+            
         self.throughput_prev.append(throughput)
         if len(self.throughput_prev) > self.look_back:
             self.throughput_prev.pop(0)
+        self.latency_prev.append(latency)
+        if len(self.latency_prev) > self.look_back:
+            self.latency_prev.pop(0)
         
-        observation = self.get_observation(throughput)
-
+        observation = self.get_observation(throughput, latency)
+        # print(observation)
         # check if the quality changed from the last bitrate selection action
         q_change = 0
         if self.action_prev is not None:
             q_change = abs(self.action_prev - action)
+        self.action_prev = action
         
         # calculate the qoe at the current time step
         reward = (action * self.r_multipliers[0]) - (q_change * self.r_multipliers[1]) - (rebuff_time * self.r_multipliers[2])
 
         # once the movie has ended, a terminal state is reached
         is_terminal = (self.emulator.get_n_segs_left() == 0)
-
+        # print(f'getting reward {reward} = {action * self.r_multipliers[0]} - {q_change * self.r_multipliers[1]} - {rebuff_time * self.r_multipliers[2]}')
         return observation, reward, is_terminal, truncated, info
 
     def reset(self, seed=None):
@@ -81,17 +84,16 @@ class ABR_Env(gym.Env):
         # create a new instance of the emulator now that the trace/movie has been incramented
         # this is important because it resets a LOT of sabre global variables
         self.emulator  = Emulator(self.movies[self.movie_idx], self.network_traces[self.trace_idx])
-        observation = self.get_observation(0)
+        observation = self.get_observation(0, 0)
 
         return observation, info
 
-    def get_observation(self, throughput):
+    def get_observation(self, throughput, latency):
         observation = {}
         seg = self.emulator.current_segment
         segs_left   =  self.emulator.get_n_segs_left()
         observation['buffer_level'] = self.emulator.get_buffer_level()
-        observation['throughput'] = throughput
-
+        
         # the look_ahead segment sizes are set to zero when nearing the end of
         # the movie and there are no more to look at. 
         if segs_left >= self.look_ahead:
@@ -104,12 +106,19 @@ class ABR_Env(gym.Env):
             observation['qualities'] = np.zeros((self.look_ahead, self.n_bitrates), dtype=np.float32)
 
         # througput values are initally set to zero when no observations have been made yet
+        throughput_obs = np.zeros(3)
+        throughput_obs[0] = throughput
         if len(self.throughput_prev) > 0:
-            observation['throughput_avg'] = np.mean(self.throughput_prev)
-            observation['throughput_std'] = np.std(self.throughput_prev)
-        else:
-            observation['throughput_avg'] = 0
-            observation['throughput_std'] = 0
+            throughput_obs[1] = np.mean(self.throughput_prev)
+            throughput_obs[2] = np.std(self.throughput_prev)
+        observation['throughput'] = throughput_obs
+
+        latency_obs = np.zeros(3)
+        latency_obs[0] = latency
+        if len(self.latency_prev) > 0:
+            latency_obs[1] = np.mean(self.latency_prev)
+            latency_obs[2] = np.std(self.latency_prev)
+        observation['latency'] = latency_obs
 
         # sanity check that all observation keys have values
         assert all(o is not None for o in observation.values())

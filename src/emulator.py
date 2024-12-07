@@ -80,4 +80,7 @@ class Emulator:
         throughput = download_metric.downloaded / download_time                                            
         latency    = download_metric.time_to_first_bit 
 
+        # if rebuff > 0:
+        #     print(f'buffered: {rebuff}')
+
         return throughput, latency, rebuff
