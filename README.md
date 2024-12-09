@@ -1,6 +1,11 @@
 # RL-based-ABR-streaming
 
-### Getting Started:
+## Overview:
+This project was developed as part of Purdue's ECE 59500 course, Reinforcement Learning. Designed for the Master’s program in Electrical and Computer Engineering, the course allowed for an open-ended exploration of a chosen topic within the field of reinforcement learning.
+
+In this project, we explore the application of reinforcement learning (RL) in enhancing Adaptive Bitrate (ABR) video streaming over HTTP. Utilizing real-world network traces and open-source simulation tools, RL models outperform traditional ABR approaches, achieving significant reductions in rebuffering and bitrate variability. Despite the advancements, challenges in balancing QoE components remain. This work shows that RL has promise in ABR optimization and sets the stage for future developments in robust video streaming solutions.
+
+## Getting Started:
 
 For convienience purposes, a `Makefile` was written in order to simplify the process of 
 setting up the repo. Note, this repo was developed and run on an Ubuntu 22 system 
@@ -24,7 +29,7 @@ If the environment is ever messed up, it can be wiped with:
 make env-delete
 ```
 
-### Overview:
+## Project Structure:
 Several folders were created for the project with all data and results that have been gathered. 
 
 **Data:**  
